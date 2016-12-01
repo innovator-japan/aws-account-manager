@@ -17,3 +17,4 @@ Route::get('/', [
 ]);
 
 Auth::routes();
+Route::resource('accounts', 'AccountController');
