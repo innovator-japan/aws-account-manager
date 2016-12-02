@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Auth;
+use Log;
 use App\Models\Account;
+use Aws\Sts\StsClient;
 
 class AccountController extends Controller
 {
@@ -112,5 +115,62 @@ class AccountController extends Controller
     {
         Account::findOrFail($id)->delete();
         return redirect()->route('accounts.index');
+    }
+
+    /**
+     * Login to the specified account.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function login($id)
+    {
+        $account = Account::findOrFail($id);
+        $name = Auth::user()->name;
+        try {
+            $url = $this->getSigninTokenURL($account, $name);
+        } catch (\Exception $e) {
+            Log::warning($e);
+            return redirect()->route('accounts.index');
+        }
+        return redirect($url);
+    }
+
+    /**
+     * Generate signin token url and return it.
+     *
+     * @param  \App\Models\Account  $account
+     * @param  string  $name
+     * @return string URL
+     */
+    public function getSigninTokenURL(Account $account, $name)
+    {
+        $client = StsClient::factory([
+            'version' => 'latest',
+            'region'  => 'ap-northeast-1',
+            'credentials' => [
+                'key' => $account->access_key_id,
+                'secret' => $account->secret_access_key,
+            ],
+        ]);
+        $result = $client->getFederationToken([
+            'Name' => $name,
+            'Policy' => json_encode(json_decode(Account::DEFAULT_POLICY)),
+            'DurationSeconds' => 3600,
+        ]);
+        $credentials = $result->get('Credentials');
+        $session_json = rawurlencode(json_encode([
+            'sessionId' => $credentials['AccessKeyId'],
+            'sessionKey' => $credentials['SecretAccessKey'],
+            'sessionToken' => $credentials['SessionToken'],
+        ]));
+        $get_signin_token_url = Account::SIGNIN_URL.'?Action=getSigninToken&Session='.$session_json;
+        $returned_content = file_get_contents($get_signin_token_url);
+        $signin_token = rawurlencode(json_decode($returned_content)->SigninToken);
+        $issuer = rawurlencode(config('app.url'));
+        $destination = rawurlencode(Account::CONSOLE_URL);
+        $url = Account::SIGNIN_URL.'?Action=login&Issuer='.$issuer.'&Destination='.$destination.'&SigninToken='.$signin_token;
+
+        return $url;
     }
 }

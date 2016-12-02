@@ -23,6 +23,7 @@
                                 <td>{{ $account->name }}</td>
                                 <td>
                                     <form method="POST" action="{{ route('accounts.destroy', $account->id) }}">
+                                        <a href="{{ route('accounts.login', $account->id) }}" class="btn btn-sm btn-success">Login</a>
                                         <a href="{{ route('accounts.edit', $account->id) }}" class="btn btn-sm btn-default">Edit</a>
                                         {{ csrf_field() }}
                                         <input name="_method" type="hidden" value="DELETE">
