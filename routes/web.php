@@ -18,3 +18,7 @@ Route::get('/', [
 
 Auth::routes();
 Route::resource('accounts', 'AccountController');
+Route::get('accounts/{id}/login', [
+    'uses' => 'AccountController@login',
+    'as' => 'accounts.login',
+]);
