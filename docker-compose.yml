@@ -2,14 +2,17 @@ version: '2'
 services:
     sqldata:
         image: alpine
+        container_name: "aam-alpine"
         volumes:
           - ./public:/var/www/html
-    wwwdata:
+    www:
         image: alpine
+        container_name: "aam-www"
         volumes:
           - ./public:/var/www/html
     nginx:
         build: ./docker/nginx
+        container_name: "aam-nginx"
         ports:
           - "8000:80"
         links:
@@ -17,19 +20,21 @@ services:
         volumes:
           - ./docker/nginx/server.conf:/etc/nginx/conf.d/server.conf
         volumes_from:
-          - wwwdata
+          - www
     php:
       build: ./docker/php
+      container_name: "aam-php"
       links:
-        - db
+        - mysql
       volumes:
         - ./docker/php/php.ini:/usr/local/etc/php/php.ini
       volumes_from:
-        - wwwdata
+        - www
       depends_on:
-        - "db"
-    db:
+        - "mysql"
+    mysql:
       image: mysql
+      container_name: "aam-mysql"
       volumes_from:
         - sqldata
       environment:
