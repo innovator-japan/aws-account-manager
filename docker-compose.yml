@@ -19,8 +19,6 @@ services:
           - php
         volumes:
           - ./docker/nginx/server.conf:/etc/nginx/conf.d/server.conf
-        volumes_from:
-          - www
     php:
       build: ./docker/php
       container_name: "aam-php"
@@ -28,15 +26,11 @@ services:
         - mysql
       volumes:
         - ./docker/php/php.ini:/usr/local/etc/php/php.ini
-      volumes_from:
-        - www
       depends_on:
         - "mysql"
     mysql:
       image: mysql
       container_name: "aam-mysql"
-      volumes_from:
-        - sqldata
       environment:
         MYSQL_ROOT_PASSWORD: "password"
         MYSQL_DATABASE: "aws_account_manager"
