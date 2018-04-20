@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURRENT=/srv/www/account-manager
+CURRENT=/srv/www/aws.innovator-jp.info
 SHARED=/srv/www/shared
 cd $CURRENT
 
