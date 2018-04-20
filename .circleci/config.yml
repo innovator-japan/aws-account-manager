@@ -1,0 +1,49 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/php:7.2-apache-node-browsers
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - composer_cache
+      - run: composer install --prefer-dist
+      - save_cache:
+          paths:
+            - "~/.composer/cache"
+          key: composer_cache
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  deploy_production:
+    working_directory: ~/repo
+    environment:
+      - AWS_DEFAULT_REGION: ap-northeast-1
+      - CODE_DEPLOY_S3_BUCKET_NAME: aws-account-manager-deploy 
+      - CODE_DEPLOY_APPLICATION_NAME: account-manager
+      - CODE_DEPLOY_GROUP_NAME: production
+      - APP_DIR: .
+    docker:
+      - image: innovatorjapan/awscli:latest
+    steps:
+      - attach_workspace:
+          at: .
+      - run: rm -rf .git
+      - run: echo $PATH
+      - run: sh /bin/aws-s3-deploy
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy_production:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
