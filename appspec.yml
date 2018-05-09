@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: .
+  - source: /src
     destination: /srv/www/aws.innovator-jp.info
 permissions:
   - object: /srv/www/aws.innovator-jp.info 

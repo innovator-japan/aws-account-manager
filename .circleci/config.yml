@@ -10,7 +10,7 @@ jobs:
       - restore_cache:
           keys:
             - composer_cache
-      - run: composer install --prefer-dist
+      - run: cd src; composer install --prefer-dist
       - save_cache:
           paths:
             - "~/.composer/cache"
