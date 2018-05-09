@@ -6,11 +6,11 @@ services:
           - "80:80"
         volumes:
           - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-          - ./:/var/www/app
+          - ./src:/var/www/app
     php:
         build: ./docker/php
         volumes:
-          - ./:/var/www/app
+          - ./src:/var/www/app
     mysql:
         image: mysql:5.7
         volumes:

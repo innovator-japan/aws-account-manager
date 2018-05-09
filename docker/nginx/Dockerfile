@@ -1,2 +1,0 @@
-FROM nginx:latest
-MAINTAINER innovator_japan_engineers
